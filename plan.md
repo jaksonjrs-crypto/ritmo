@@ -1,57 +1,80 @@
-# Plano — Ritmo
+# Ritmo V2.0 — Hub / Suite
 
-## Objetivo e decisões
+## Objetivo da V2.0
+Reduzir a dispersão no celular: um único ícone que leva às IAs, aos PWAs domésticos, aos sites e ao que está em andamento. A V2.0 mantém todos os limites da V1: nenhuma conexão com contas, nenhuma publicação, nenhuma leitura do conteúdo dos serviços.
 
-Construir um aplicativo móvel em português que reduza o tempo entre abrir o app e iniciar a tarefa mais importante. A tela Hoje prioriza a próxima ação e o planejamento do dia; criar tarefa deve estar sempre a um toque. Dados pessoais serão mantidos no dispositivo com AsyncStorage, sem exigir conta ou conexão para o fluxo principal. A base fica no Expo Router, React Native, TypeScript e NativeWind já instalados; o backend existente não será necessário para as funções desta versão.
+## Decisões
+- A Visão geral começa pelo **acesso rápido** (fixados, abertos por último e pergunta rápida), depois "Hoje" e o resumo da semana.
+- **Apps e IAs** substitui "Ferramentas": atalhos com tipo (IA, app/PWA, site, rede, ferramenta), fixar, editar, descrição e emoji.
+- Pergunta rápida: só o Claude e o ChatGPT aceitam o texto por endereço; nos demais o texto é copiado e o site é aberto. O texto só sai quando o usuário toca em uma IA.
+- Sem ícones externos (nenhum pedido de favicon a terceiros): ícone é emoji ou inicial.
+- Espaço privado por `OWNER_OPEN_ID`; sem a variável, isolamento por usuário continua valendo.
+- Migrações somente aditivas (`0003_hub_launcher`).
 
-## Escopo funcional
+## Fora da V2.0 (avaliar à parte)
+Chat com IA dentro do Ritmo (API/chaves/custos), abrir apps nativos por esquema próprio (`intent://`, `claude://`), sincronizar com Google Agenda, notificações.
 
-- Onboarding curto para explicar o fluxo e escolher uma preferência de lembrete; conclusão persistida.
-- Dia: saudação contextual, progresso de tarefas, próxima tarefa destacada, agenda em blocos e início rápido de foco.
-- Tarefas: criar, editar, concluir e remover; título, prioridade, duração, data/horário, nota e meta opcional; busca e filtros por estado, data e prioridade.
-- Planejamento: agenda diária que prioriza tarefas com horário, permite reagendamento simples e acesso rápido à criação.
-- Metas: criar, editar e atualizar progresso; acompanhamento visual e associação opcional de tarefas.
-- Configurações: preferências, ativação de notificações locais com explicação de permissão, e ação de recuperação/reinicialização de dados com confirmação.
-- Persistência segura contra falha de leitura/escrita; detecção de indisponibilidade de rede quando possível, com mensagem de que os dados locais continuam acessíveis; estados de carregamento, vazio, permissão, erro, sucesso e recuperação.
+---
 
-## Arquitetura e estrutura
+# Ritmo — plano de implementação
 
-- `app/_layout.tsx`: provedores do starter, stack Expo Router e montagem de `AppStorageGate` antes de expor rotas.
-- `app/onboarding.tsx`: fluxo inicial curto com nome opcional e escolha explícita de lembretes.
-- `app/(tabs)/_layout.tsx`: navegação inferior com Hoje, Tarefas, Planejar e Metas.
-- `app/(tabs)/index.tsx`, `tasks.tsx`, `plan.tsx`, `goals.tsx`: telas principais, com a tela Hoje priorizando o próximo passo.
-- `app/settings.tsx` e `app/oauth/callback.tsx`: preferências/dados locais e rota do starter preservada.
-- `components/`: portão global e recuperação de armazenamento, banner de falha, cartões, progresso, estados vazios e editores/timer modais.
-- `providers/app-state-provider.tsx`: estado global tipado, hidratação, cópia anterior, fila de gravação AsyncStorage e ações de domínio.
-- `hooks/use-connectivity.ts` e `hooks/use-reduced-motion.ts`: estado offline e preferência de movimento reduzido do sistema.
-- `lib/date.ts`: helpers de data/horário; `constants/ritmo-theme.ts`: tokens e identidade visual.
-- `assets/images/`: ícones de marca quadrados e arquivos nativos, sem cantos arredondados embutidos.
+## Produto e escopo
 
-## Persistência, rede e permissões
+PWA pessoal e privada, sincronizada entre dispositivos, para Jakson acompanhar projetos, tarefas, agenda e produção semanal de conteúdo. O MVP prioriza reduzir dispersão e tornar visível o que já está em andamento. Não conecta contas de redes sociais ou ferramentas de IA, não agenda nem publica, não envia conteúdo e não promete notificações externas. Toda ação externa continua sendo feita manualmente pelo usuário.
 
-Persistir tarefas, metas, preferências, estado de onboarding e lembretes como um único documento versionado em AsyncStorage. `AppStorageGate` mantém todas as rotas atrás do estado de carregamento/recuperação; erro de leitura oferece tentar novamente sem sobrescrever dados; falha ao salvar fica visível globalmente e pode ser tentada novamente por uma ação posterior. O app funciona offline porque operações centrais são locais; exibir um aviso não bloqueante quando a conectividade estiver indisponível. Solicitar permissão para notificações apenas após ação explícita em onboarding/configurações; se negada, explicar como alterar nas configurações do dispositivo. No Web, evitar prometer notificações nativas e informar a limitação/alternativa.
+O ponto de partida inclui projetos editáveis derivados do que Jakson já relatou: e-book Amazon KDP e sua divulgação; e-book Hotmart; ferramenta própria de garimpo e vitrine; canais de música para relaxar e dormir no YouTube. As redes Instagram, Facebook, TikTok, YouTube, Pinterest, Shopee Vídeos e Telegram são opções de canal para planejamento. Nenhuma métrica, prazo, agendamento ou resultado financeiro será inventado.
 
-## PWA Web instalável e offline
+## Experiência principal
 
-A versão Web permanece no Expo Router com exportação estática e passa a possuir um manifest próprio, ícones quadrados derivados do ícone atual, metadados de cor e apresentação standalone. O projeto seleciona `application_owned` para o domínio PWA da Manus porque o aplicativo serve seu próprio manifest. Um service worker em `/service-worker.js` é registrado apenas no Web e usa uma estratégia conservadora: pré-cache do shell/ícones, cache-first para recursos estáticos same-origin e fallback local para navegação; chamadas `/api/`, endpoints externos e respostas autenticadas não entram em cache. Tarefas, metas e preferências seguem no armazenamento local existente, permitindo operações centrais offline depois que a interface for carregada ao menos uma vez.
+A Home é um painel calmo de “semana em foco”: próximos passos, tarefas por prazo/prioridade, estimativa de carga e conteúdos aguardando revisão. A capacidade semanal fica sem valor inicial; o usuário pode defini-la. O painel mostra carga estimada versus capacidade somente depois de a capacidade ser informada. Não há streaks, alertas alarmistas nem linguagem que sugira que o usuário deveria estar sempre produzindo.
 
-## Design
+A navegação mobile-first oferece Visão geral, Projetos, Conteúdos, Agenda e Ferramentas; em desktop, esses destinos aparecem numa barra lateral. Tarefas e conteúdos ficam ligados a projetos. Eventos pessoais e blocos de descanso podem ocupar a agenda. A agenda semanal usa registros manuais e datas locais; não sincroniza com Google Calendar no MVP.
 
-**Direções consideradas (probabilidades de cauda):** Editorial caloroso de produtividade — 0,06; Neo-brutalismo enérgico — 0,03; Diário botânico contemplativo — 0,08. **Escolhida: Editorial caloroso de produtividade.**
+O fluxo de conteúdo registra produto, objetivo, canais, data pretendida, notas e etapa: produto escolhido → briefing → roteiro/texto → gravação → edição → revisão → aprovado → agendado manualmente → publicado → acompanhamento. Marcar como aprovado exige checklist explícito de texto, peça visual, canal/conta, data/hora, link/CTA e oferta. Agendado/publicado são estados informativos atualizados pelo usuário, nunca uma operação realizada pelo Ritmo. A confirmação é humana e a interface identifica que a ação externa deve ser feita na plataforma correspondente.
 
-- **Movimento de design:** editorial contemporâneo de bem-estar e produtividade, inspirado em cadernos de trabalho cuidadosamente diagramados.
-- **Princípios centrais:** uma ação primária clara; densidade controlada e leitura em varredura; progresso motivador sem culpa; controles confortáveis para uso com uma mão.
-- **Filosofia de cor:** fundo marfim quente e superfícies claras reduzem ruído; tinta quase preta dá legibilidade; verde-lima profundo é a cor própria e energética para ação/progresso; pêssego marca prioridades e acolhe avisos sem parecer alarme.
-- **Paradigma de layout:** coluna editorial vertical com cabeçalho leve, cartão de foco de largura total, linha do tempo como eixo visual e barra inferior enxuta; evitar dashboards cheios de mini-gráficos.
-- **Elementos-assinatura:** marcador circular de progresso desenhado como traço de caneta; cartões com filete lateral colorido por contexto; mini-etiqueta de tempo em formato de pílula.
-- **Interação:** criação rápida em modal/bottom sheet com poucos campos e expansão opcional; concluir com toque e retorno tátil discreto; ações destrutivas requerem confirmação acessível; salvar oferece confirmação clara e recuperação.
-- **Animação:** transições curtas de 160–220 ms, progresso com easing suave, entrada discreta do cartão de foco; respeitar Reduce Motion, sem animação essencial para entender estado.
-- **Tipografia:** system sans-serif para leitura e interface, com títulos fortes, tamanho-base 16 px e rótulos nunca abaixo de 12 px; horas e contagens com números tabulares quando disponíveis.
-- **Essência da marca:** “Ritmo ajuda você a transformar intenção na próxima ação, sem complicar o dia”; pessoal, atento, descomplicado.
-- **Voz:** frases curtas, humanas e orientadas à ação; CTA direto e microcopy sem culpa. Exemplos: “Vamos por partes.” / “Seu próximo passo já está escolhido.”
-- **Wordmark e símbolo:** “ritmo” em minúsculas com espaçamento amplo; símbolo autoral formado por um arco de progresso interrompido e um ponto de início, aplicado como ícone simples.
-- **Cor-signatura:** verde-oliva vivo (referência aproximada `#758A32`), exclusivo do produto para ação e progresso.
+Resultados são lançamentos manuais, com data, métrica, valor e observação por conteúdo ou projeto. Os atalhos iniciais abrem Gemini (Google AI Pro), Claude e ElevenLabs; atalhos de redes e URLs personalizadas podem ser cadastrados pelo usuário. Um atalho só abre a URL; não lê nem controla o serviço. Uma exportação JSON manual permite ao usuário guardar uma cópia de seus dados.
 
-## Execução técnica
+## Arquitetura e segurança
 
-Manter React Native e NativeWind do starter; componentes pressionáveis devem seguir o contrato do starter (`Pressable` estilizado via `style`). Usar ícones do `@expo/vector-icons`; suportar telas estreitas, safe areas, contraste e áreas de toque generosas. Implementar o onboarding e o estado local antes de ligar as telas, depois telas/fluxos e estados de feedback. O desenvolvimento deve iniciar pelas entradas declaradas em `runtime/dev-commands` para Metro (8081) e API (3000), com a migração/schema do starter sincronizados antes de tráfego de API conforme o README do Expo.
+- Frontend: React, TypeScript, Vite, Wouter, Tailwind e tRPC React Query, com layout responsivo e dados sempre carregados da API autenticada.
+- Backend: Express + tRPC; todos os procedimentos de negócio usam `protectedProcedure`.
+- Login: OAuth Manus fornecido pelo starter. Sem senha própria ou coleta de credenciais de terceiros.
+- Persistência: MySQL gerenciado do projeto com Drizzle. Tabelas de domínio têm `userId`; cada listagem, leitura, alteração e exclusão filtra pelo `ctx.user.id`. IDs de outra conta não podem ser usados para consultar ou modificar registros.
+- Aprovação sincronizada: cada conteúdo tem uma revisão monotônica; edições e mudanças de etapa avançam a versão, e a aprovação só grava se a versão e a etapa continuarem iguais às abertas no checklist, impedindo aprovações antigas entre dispositivos.
+- Dados conceituais: `Project`, `Task`, `ContentItem`, `CalendarEvent`, `ResultMetric` e `Shortcut`, além de `User` do starter.
+- Alterações de esquema são aditivas, versionadas por migração e aplicadas uma vez via `pnpm db:migrate`. Desenvolvimento e publicação usam o mesmo banco; nenhuma migração destrutiva é prevista.
+- Nenhuma saída de IA é executada como instrução. O MVP não possui roteador de IA nem conectores operacionais.
+- Atalhos validam URLs HTTPS e abrem em nova aba. Não guardam senhas ou tokens.
+- A exportação é iniciada pelo usuário, autenticada e contém apenas os registros da conta atual.
+- A PWA tem manifesto e identidade visual próprios; nenhum service worker cacheia respostas privadas. Dados sincronizados exigem conexão online.
+
+## Estrutura do projeto
+
+- `client/src/pages/Home.tsx`: shell, navegação e telas de resumo, projetos, conteúdo, agenda e atalhos.
+- `client/src/components/`: elementos reutilizáveis de cards, formulários, diálogo de aprovação e navegação mobile.
+- `client/src/index.css`: tokens visuais, tipografia e responsividade.
+- `client/public/manifest.webmanifest` e ícones: instalação como PWA.
+- `server/routers.ts`: endpoints tRPC autenticados para as entidades e exportação.
+- `server/db.ts`: consultas Drizzle com isolamento por usuário e criação inicial dos projetos/atalhos.
+- `drizzle/schema.ts` e `drizzle/0001_*.sql`: modelo e migração aditiva do MVP.
+- `plan.md` e `TODO.md`: fonte de decisões e critérios de entrega.
+
+## Direção de design
+
+Três opções consideradas: **bancada editorial serena** (0,08); **planner analógico tátil, como caderno de estúdio** (0,04); **painel escuro de alta energia, com acentos neon** (0,06). Escolha: bancada editorial serena, para priorizar clareza sem pressionar a pessoa.
+
+- **Movimento:** editorial suíço contemporâneo, aplicado a uma ferramenta pessoal.
+- **Princípios:** calma; informação escaneável; estados explícitos; revisão humana visível.
+- **Cores:** fundo papel quente, tinta verde-petróleo como cor de ação e âmbar suave para espera; vermelho apenas para erro real, nunca para produtividade atrasada.
+- **Layout:** barra lateral discreta em desktop; navegação inferior em celular; conteúdo alinhado em coluna com resumos e listas, evitando grade de métricas como tela inteira.
+- **Elementos de assinatura:** trilha de etapas do conteúdo; selo “revisão manual”; marcador de foco semanal sem pontuação competitiva.
+- **Interação:** estado só muda por ação explícita; antes de aprovar, checklist; textos sempre dizem se algo é apenas registro ou ação externa.
+- **Animação:** transições breves de opacidade/posição, sem movimento contínuo ou celebrações gamificadas.
+- **Tipografia:** Georgia para títulos e system-ui/Arial para interface e corpo, com hierarquia curta e legível.
+- **Essência:** “um lugar para fechar o ciclo da semana sem abrir mais dez frentes”; personalidade tranquila, precisa e encorajadora.
+- **Tom:** mensagens concretas e sem cobrança. Exemplos: “Escolha o próximo passo, não o próximo projeto.” e “A publicação só fica aprovada depois da sua conferência.”
+- **Marca:** wordmark Ritmo acompanhado de três traços curvos que evocam cadência; verde-petróleo `#28675B` como cor distintiva.
+
+## Fora do MVP
+
+Publicação/agendamento automático, integrações com Meta/Instagram/Facebook, Google Calendar, APIs de Claude/Gemini/ElevenLabs, análise automática de métricas, leitura de contas, equipes, notificações em tempo real, gestão financeira e recomendações de IA. Qualquer uma dessas capacidades exige avaliação separada das APIs, permissões, limites e estados observáveis antes de ser prometida.

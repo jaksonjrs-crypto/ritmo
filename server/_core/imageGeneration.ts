@@ -40,20 +40,28 @@ export type GenerateImageResponse = {
   url?: string;
 };
 
-export async function generateImage(options: GenerateImageOptions): Promise<GenerateImageResponse> {
+export async function generateImage(
+  options: GenerateImageOptions
+): Promise<GenerateImageResponse> {
   if (!ENV.forgeApiUrl) {
-    throw new Error("BUILT_IN_FORGE_API_URL is not configured");
+    throw new Error("MANUS_API_URL is not configured");
   }
   if (!ENV.forgeApiKey) {
-    throw new Error("BUILT_IN_FORGE_API_KEY is not configured");
+    throw new Error("MANUS_API_KEY is not configured");
   }
 
   // Build the full URL by appending the service path to the base URL
-  const baseUrl = ENV.forgeApiUrl.endsWith("/") ? ENV.forgeApiUrl : `${ENV.forgeApiUrl}/`;
-  const fullUrl = new URL("images.v1.ImageService/GenerateImage", baseUrl).toString();
+  const baseUrl = ENV.forgeApiUrl.endsWith("/")
+    ? ENV.forgeApiUrl
+    : `${ENV.forgeApiUrl}/`;
+  const fullUrl = new URL(
+    "images.v1.ImageService/GenerateImage",
+    baseUrl
+  ).toString();
 
   const model = options.model ?? DEFAULT_IMAGE_MODEL;
-  const quality = options.quality ?? (model === DEFAULT_IMAGE_MODEL ? DEFAULT_IMAGE_QUALITY : undefined);
+  const quality =
+    options.quality ?? (model === DEFAULT_IMAGE_MODEL ? DEFAULT_IMAGE_QUALITY : undefined);
 
   const response = await fetch(fullUrl, {
     method: "POST",
@@ -65,7 +73,7 @@ export async function generateImage(options: GenerateImageOptions): Promise<Gene
     },
     body: JSON.stringify({
       prompt: options.prompt,
-      original_images: options.originalImages || [],
+      originalImages: options.originalImages || [],
       model,
       ...(quality ? { quality } : {}),
     }),
@@ -74,21 +82,32 @@ export async function generateImage(options: GenerateImageOptions): Promise<Gene
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
     throw new Error(
-      `Image generation request failed (${response.status} ${response.statusText})${detail ? `: ${detail}` : ""}`,
+      `Image generation request failed (${response.status} ${response.statusText})${detail ? `: ${detail}` : ""}`
     );
   }
 
   const result = (await response.json()) as {
-    image: {
-      b64Json: string;
-      mimeType: string;
-    };
+    image?: { b64Json?: string; url?: string; mimeType?: string };
+    error?: unknown;
   };
-  const base64Data = result.image.b64Json;
-  const buffer = Buffer.from(base64Data, "base64");
+  if (result.error || !result.image) throw new Error("Image service did not return an image");
+  let buffer: Buffer;
+  if (result.image.b64Json) {
+    buffer = Buffer.from(result.image.b64Json, "base64");
+  } else if (result.image.url) {
+    const imageResponse = await fetch(result.image.url);
+    if (!imageResponse.ok) throw new Error(`Image download failed (${imageResponse.status})`);
+    buffer = Buffer.from(await imageResponse.arrayBuffer());
+  } else {
+    throw new Error("Image service returned no downloadable bytes");
+  }
 
   // Save to S3
-  const { url } = await storagePut(`generated/${Date.now()}.png`, buffer, result.image.mimeType);
+  const { url } = await storagePut(
+    `generated/${Date.now()}.png`,
+    buffer,
+    result.image.mimeType
+  );
   return {
     url,
   };
@@ -111,14 +130,19 @@ export type ListImageModelsResponse = {
  */
 export async function listImageModels(): Promise<ListImageModelsResponse> {
   if (!ENV.forgeApiUrl) {
-    throw new Error("BUILT_IN_FORGE_API_URL is not configured");
+    throw new Error("MANUS_API_URL is not configured");
   }
   if (!ENV.forgeApiKey) {
-    throw new Error("BUILT_IN_FORGE_API_KEY is not configured");
+    throw new Error("MANUS_API_KEY is not configured");
   }
 
-  const baseUrl = ENV.forgeApiUrl.endsWith("/") ? ENV.forgeApiUrl : `${ENV.forgeApiUrl}/`;
-  const fullUrl = new URL("images.v1.ImageService/ListModels", baseUrl).toString();
+  const baseUrl = ENV.forgeApiUrl.endsWith("/")
+    ? ENV.forgeApiUrl
+    : `${ENV.forgeApiUrl}/`;
+  const fullUrl = new URL(
+    "images.v1.ImageService/ListModels",
+    baseUrl
+  ).toString();
 
   const response = await fetch(fullUrl, {
     method: "POST",
@@ -134,7 +158,7 @@ export async function listImageModels(): Promise<ListImageModelsResponse> {
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
     throw new Error(
-      `List image models failed (${response.status} ${response.statusText})${detail ? `: ${detail}` : ""}`,
+      `List image models failed (${response.status} ${response.statusText})${detail ? `: ${detail}` : ""}`
     );
   }
 

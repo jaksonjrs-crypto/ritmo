@@ -1,13 +1,76 @@
-# Entregas
+# TODO — Ritmo V2.0
 
-- [x] **Onboarding e navegação principal** — O aplicativo deve incluir integração inicial (onboarding) e navegação intuitiva; o onboarding breve explica a experiência, permite configurar a preferência de lembrete e persiste sua conclusão; a navegação permite chegar rapidamente a Dia, Tarefas, Planejar, Metas e Configurações.
-- [x] **Tarefas e planejamento de tempo** — O aplicativo deve cobrir os fluxos principais de criação e gerenciamento: criar, editar, concluir e remover tarefas; cada tarefa pode ter prioridade, duração, horário/data planejados, nota e meta relacionada; a tela Dia ajuda a concluir a tarefa principal rapidamente em um celular; Planejar reúne agenda diária e oferece acesso rápido para criar ou reagendar tarefas; incluir início rápido de foco. Tarefas vinculadas atualizam o progresso da meta ao concluir e revertem essa contribuição ao reabrir.
-- [ ] **Metas, busca e filtros** — Acompanhar metas com progresso visível e atualização simples; buscar tarefas e filtrá-las por estado, data e prioridade; permitir associação opcional entre tarefas e metas. Implementado o filtro por estado, data de hoje e todas as faixas de prioridade; permanece limitado a “Hoje” em vez de escolher uma data arbitrária.
-- [x] **Notificações e configurações** — Oferecer lembretes/notificações configuráveis e tratar claramente a permissão do dispositivo; configurações devem apresentar preferências do app e notificações, além de gerenciamento dos dados locais com confirmação para ações destrutivas. O onboarding e Configurações solicitam permissão somente após opt-in explícito; na Web a limitação nativa é indicada.
-- [x] **Persistência e estados da interface** — Persistir os dados de forma adequada no dispositivo, com funcionamento dos fluxos centrais sem conexão; apresentar estados de carregamento, vazio, offline, permissão, erro, sucesso e recuperação; falhas de leitura/escrita não podem apagar silenciosamente dados existentes; ações importantes devem fornecer feedback acessível. Todas as rotas aguardam a hidratação e compartilham tela de recuperação; falhas de salvamento aparecem globalmente.
-- [ ] **Interface móvel responsiva e acessível** — Projetar telas principais e fluxos para celular, com layout responsivo, contraste legível, rótulos acessíveis, alvos de toque generosos, safe areas e interface refinada; reduzir movimento quando preferido. Movimento reduzido é respeitado nas transições dos modais; rótulos auxiliares têm no mínimo 12 px e os controles compactos têm alvos de toque de ao menos 44 px. Ainda falta validar em aparelho real.
-- [x] **PWA instalável e offline** — A versão Web deve oferecer manifest, ícones e metadados adequados para instalação na tela inicial; um service worker deve guardar a interface e os recursos necessários para reabertura sem rede, sem cachear APIs ou conteúdo autenticado; tarefas e metas devem continuar salvas localmente. Manifest, HTML de instalação, service worker, fallback offline e ícones 192/512 foram incluídos e passaram pela exportação estática; instalação e operação offline não foram exercitadas em aparelho físico.
+## Lançador (Hub)
+- Visão geral abre com acesso rápido: atalhos fixados, abertos por último e pergunta rápida a uma IA.
+- Tela "Apps e IAs": agrupar por tipo, buscar, fixar/desafixar, editar e remover; atalhos só abrem o endereço.
+- Aceitar endereço curto (`claude.ai`) e recusar tudo que não seja HTTPS.
+- Atalhos iniciais editáveis, criados uma única vez por conta (sem duplicar o que o usuário já tinha).
+- Atalhos do ícone do PWA: Apps e IAs, Agenda e Nova tarefa.
 
-## Evidência de implementação
+## Privacidade e robustez
+- Com `OWNER_OPEN_ID` definido, outra conta não acessa nenhum dado nem altera nada.
+- Semana e "Hoje" acompanham o relógio mesmo com o app aberto por dias.
+- Primeira carga simultânea não duplica projetos nem atalhos.
 
-Checagens TypeScript, lint Expo, 25 testes e export Web estático foram executados; manifest, service worker, ícones e página offline foram encontrados na exportação e responderam HTTP 200 no preview; o schema do starter não exigiu migrações; Metro e API permaneceram ativos e `GET /manus-routes.json` respondeu com HTTP 200 e JSON válido. A instalação e o modo offline ainda não foram exercitados em aparelho físico; notificações, retorno tátil e armazenamento nativo também aguardam validação em aparelho real.
+## Fica para depois
+- Dividir `Home.tsx` em telas menores.
+- Reordenar atalhos por arrastar.
+- Chat de IA dentro do Ritmo (exige avaliação de API, chaves e custo).
+
+---
+
+# TODO — Ritmo MVP
+
+## Conta privada e sincronização
+- A PWA deve exigir a conta autorizada antes de mostrar dados do hub.
+- Os dados devem ser persistidos no banco em nuvem e carregados na sessão em outro dispositivo após login.
+- Cada leitura, criação, atualização, exclusão e exportação deve ser limitada ao usuário autenticado; registros de outra conta não podem ser consultados ou alterados por IDs conhecidos.
+- Login usa OAuth Manus do starter; não há senha própria nem coleta de credenciais externas.
+
+## Painel de projetos e próximos passos
+- Mostrar projetos em andamento, situação atual, próximo passo e tarefas pendentes.
+- Permitir criar, editar, pausar/concluir e visualizar projetos.
+- Iniciar com projetos editáveis derivados do contexto conhecido: e-book Amazon KDP e divulgação; e-book Hotmart; ferramenta de garimpo/vitrine; canais de música para relaxar/dormir no YouTube.
+- Não inventar prazos, métricas ou resultados financeiros para os projetos iniciais.
+
+## Tarefas e capacidade semanal
+- Tarefas devem aceitar projeto opcional, título, prazo, prioridade, estimativa de minutos e estado pendente/em andamento/concluída.
+- Permitir ordenar/filtrar por semana, prioridade, projeto e estado.
+- Exibir carga estimada da semana versus capacidade somente se o usuário definir capacidade semanal; não presumir um limite inicial.
+- Permitir atualizar estados explicitamente e exibir quando não há itens.
+
+## Plano semanal de conteúdo
+- Cada conteúdo deve poder se relacionar a um projeto, produto, objetivo, um ou mais canais, data pretendida e notas.
+- Oferecer os canais Instagram, Facebook, TikTok, YouTube, Pinterest, Shopee Vídeos e Telegram sem conectar as contas.
+- Acompanhar as etapas: produto escolhido, briefing, roteiro/texto, gravação, edição, revisão, aprovado, agendado manualmente, publicado e acompanhamento.
+- “Agendado manualmente” e “publicado” são registros atualizados pelo usuário; a PWA não chama serviços de rede social.
+
+## Revisão e trava de aprovação
+- Antes de aprovar conteúdo, exigir confirmação humana de: texto revisado; vídeo/carrossel/peça correta; canal e conta corretos; data e hora conferidas; link/CTA testado; produto/oferta conferidos.
+- Se qualquer item estiver desmarcado, bloquear a aprovação e indicar o que falta.
+- Ao aprovar, mostrar explicitamente que nada será enviado nem agendado pelo Ritmo e que a ação externa ainda deve ser feita manualmente.
+- Registrar checklist, estado e horário da aprovação para exibir o histórico básico da etapa. Vincular a aprovação à versão revisada: se outro dispositivo editar ou mover o conteúdo enquanto a revisão estiver aberta, exigir uma nova revisão antes de aprovar.
+
+## Agenda pessoal e descanso
+- Permitir eventos manuais para tarefas, conteúdos, compromissos pessoais e descanso.
+- Exibir uma agenda semanal móvel/responsiva com data e horário locais.
+- A agenda não sincroniza com Google Calendar no MVP e não envia lembretes externos.
+
+## Resultados manuais
+- Permitir registrar resultado vinculado a projeto ou conteúdo com data, nome da métrica, valor e observação.
+- Mostrar registros existentes sem preencher valores fictícios ou conectar analytics.
+
+## Atalhos de ferramentas
+- Incluir links de atalho para Gemini (Google AI Pro), Claude e ElevenLabs, além de permitir atalhos personalizados.
+- Abrir links HTTPS em nova aba e deixar claro que o atalho apenas abre o site; não concede acesso ao conteúdo ou às funções internas.
+- Não armazenar senhas, tokens ou credenciais de serviços externos.
+
+## Exportação de dados e PWA
+- Disponibilizar exportação JSON manual dos registros pertencentes ao usuário autenticado.
+- Incluir manifesto e ícones para instalação em dispositivos compatíveis.
+- Não cachear respostas ou páginas com dados privados em service worker.
+
+## Interface e tom
+- A interface deve funcionar em telas de celular e desktop, com navegação adequada a cada tamanho.
+- Exibir um resumo de semana em foco, projetos, tarefas, conteúdos pendentes de revisão e agenda.
+- Usar linguagem calma e informativa, sem streaks, pontos, contagens regressivas, culpa ou notificações especulativas.

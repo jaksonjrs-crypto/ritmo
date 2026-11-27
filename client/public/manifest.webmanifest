@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "Ritmo — Hub pessoal",
+  "short_name": "Ritmo",
+  "description": "Seu hub privado: IAs, apps, projetos, agenda e conteúdo em um só lugar.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f8f4",
+  "theme_color": "#28675b",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Apps e IAs", "short_name": "Apps e IAs", "description": "Abrir a tela de apps e IAs", "url": "/?view=tools", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Agenda da semana", "short_name": "Agenda", "url": "/?view=calendar", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Nova tarefa", "short_name": "Nova tarefa", "url": "/?new=task", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
