@@ -65,7 +65,7 @@ Três opções consideradas: **bancada editorial serena** (0,08); **planner anal
 
 - **Movimento:** editorial suíço contemporâneo, aplicado a uma ferramenta pessoal.
 - **Princípios:** calma; informação escaneável; estados explícitos; revisão humana visível.
-- **Cores:** fundo papel quente, tinta verde-petróleo como cor de ação e âmbar suave para espera; vermelho apenas para erro real, nunca para produtividade atrasada.
+- **Cores:** fundo papel quente, tinta azul-petróleo como cor de ação e âmbar suave para espera; vermelho apenas para erro real, nunca para produtividade atrasada.
 - **Layout:** barra lateral discreta em desktop; navegação inferior em celular; conteúdo alinhado em coluna com resumos e listas, evitando grade de métricas como tela inteira.
 - **Elementos de assinatura:** trilha de etapas do conteúdo; selo “revisão manual”; marcador de foco semanal sem pontuação competitiva.
 - **Interação:** estado só muda por ação explícita; antes de aprovar, checklist; textos sempre dizem se algo é apenas registro ou ação externa.
@@ -73,7 +73,7 @@ Três opções consideradas: **bancada editorial serena** (0,08); **planner anal
 - **Tipografia:** Georgia para títulos e system-ui/Arial para interface e corpo, com hierarquia curta e legível.
 - **Essência:** “um lugar para fechar o ciclo da semana sem abrir mais dez frentes”; personalidade tranquila, precisa e encorajadora.
 - **Tom:** mensagens concretas e sem cobrança. Exemplos: “Escolha o próximo passo, não o próximo projeto.” e “A publicação só fica aprovada depois da sua conferência.”
-- **Marca:** wordmark Ritmo acompanhado de três traços curvos que evocam cadência; verde-petróleo `#28675B` como cor distintiva.
+- **Marca:** wordmark Ritmo acompanhado de três traços curvos que evocam cadência; azul-petróleo `#28675B` como cor distintiva.
 
 ## Fora do MVP
 
